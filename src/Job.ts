@@ -17,6 +17,10 @@ export class Job {
     this.post.style.display = 'none';
   }
 
+  show(): void {
+    this.post.style.display = '';
+  }
+
   shouldHide({ keywords, companies, whitelist, hiddenJobs }: Config): boolean {
     const wasHiddenBefore = hiddenJobs.data.findIndex(id => id === this.id) > -1;
     if (wasHiddenBefore) {

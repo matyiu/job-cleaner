@@ -1,4 +1,5 @@
 import type { FieldValues } from "./Config";
+import { CONFIG_UPDATED } from "./events";
 
 document.addEventListener('DOMContentLoaded', () => {
   const cards = document.querySelectorAll<HTMLElement>('.feature-card');
@@ -56,6 +57,8 @@ async function toggleField(dataKey: string, content: HTMLElement) {
   } else {
     content.classList.add('hidden');
   }
+
+  configChanged();
 }
 
 async function inputChange(dataKey: string, chipsBox: HTMLElement, e: KeyboardEvent) {
@@ -83,6 +86,7 @@ async function inputChange(dataKey: string, chipsBox: HTMLElement, e: KeyboardEv
   input.value = '';
 
   await chrome.storage.sync.set({ [dataKey]: values });
+  configChanged();
 }
 
 function renderChip(dataKey: string, keyword: string, chipsBox: HTMLElement) {
@@ -106,8 +110,17 @@ function renderChip(dataKey: string, keyword: string, chipsBox: HTMLElement) {
     if (values.data.length === 0) {
       chipsBox.children[0]?.classList.remove('hidden');
     }
+
+    configChanged();
   });
 
   chipsBox.appendChild(chip);
 }
+
+async function configChanged(): Promise<void> {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (tab?.id) {
+    chrome.tabs.sendMessage(tab.id, { type: CONFIG_UPDATED });
+  }
+};
 

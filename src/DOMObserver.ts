@@ -1,5 +1,5 @@
 import type { JobParser } from "./JobParser";
-import type { Storage } from "./Storage";
+import type { JobState } from "./JobState";
 
 const JOB_SEARCH_LIST_DOM_SELECTOR = '.scaffold-layout__list';
 
@@ -20,24 +20,23 @@ function debounce(fn: Procedure, delayInMs: number) {
 export class DOMObserver {
   private observer: MutationObserver | undefined;
 
-  constructor(private readonly jobParser: JobParser, private readonly storage: Storage) { }
+  constructor(
+    private readonly jobParser: JobParser,
+    private readonly jobState: JobState,
+  ) { }
 
-  public async init(): Promise<void> {
+  public async init(handler: Procedure): Promise<void> {
     const jobListContainer = document.querySelector(JOB_SEARCH_LIST_DOM_SELECTOR) as HTMLElement;
     if (!jobListContainer) {
       return;
     }
 
-    const config = await this.storage.get();
-
     const callback = debounce(() => {
-      const jobs = this.jobParser.parse(jobListContainer);
+      this.jobState.update(
+        this.jobParser.parse(jobListContainer)
+      );
 
-      jobs.forEach(job => {
-        if (job.shouldHide(config)) {
-          job.hide();
-        }
-      });
+      handler();
     }, 1000);
 
     this.observer = new MutationObserver((mutations) => {
