@@ -1,1 +1,3 @@
-console.log('Script loaded!');
+import { DOMObserver } from "./DOMObserver";
+
+new DOMObserver().init();
