@@ -1,4 +1,6 @@
-{
+import { defineManifest } from '@crxjs/vite-plugin'
+
+export default defineManifest({
   "name": "Job Cleaner",
   "description": "",
   "version": "1.0",
@@ -15,4 +17,4 @@
       "js": ["./src/content.ts"]
     }
   ]
-}
+})
