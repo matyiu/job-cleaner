@@ -3,7 +3,7 @@ import type { Config } from "./Config";
 export class Job {
   constructor(
     public readonly id: string,
-    private readonly title: string,
+    public readonly title: string,
     private readonly company: string,
     private readonly post: HTMLElement,
     private description?: string,

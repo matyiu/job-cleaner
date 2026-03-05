@@ -2,6 +2,7 @@ import type { JobParser } from "./JobParser";
 import type { JobState } from "./JobState";
 
 const JOB_SEARCH_LIST_DOM_SELECTOR = '.scaffold-layout__list';
+const JOB_DESCRIPTION_SELECTOR = '.jobs-search__job-details--container';
 
 type Procedure = ((...args: unknown[]) => void) | (() => void);
 
@@ -18,8 +19,6 @@ function debounce(fn: Procedure, delayInMs: number) {
 }
 
 export class DOMObserver {
-  private observer: MutationObserver | undefined;
-
   constructor(
     private readonly jobParser: JobParser,
     private readonly jobState: JobState,
@@ -31,26 +30,53 @@ export class DOMObserver {
       return;
     }
 
-    const callback = debounce(() => {
+    const handleJobListChanged = debounce(() => {
       this.jobState.update(
-        this.jobParser.parse(jobListContainer)
+        this.jobParser.parseList(jobListContainer)
       );
 
       handler();
     }, 1000);
 
-    this.observer = new MutationObserver((mutations) => {
+    const jobListObserver = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
         if (mutation.type === 'childList') {
-          callback();
+          handleJobListChanged();
         }
       }
     });
 
-    this.observer.observe(jobListContainer, {
+    jobListObserver.observe(jobListContainer, {
       childList: true,
       subtree: true,
-    })
+    });
+
+    const jobDescriptionContainer = document.querySelector(JOB_DESCRIPTION_SELECTOR) as HTMLElement;
+    if (!jobDescriptionContainer) {
+      return;
+    }
+
+    const handleJobDescriptionChanged = debounce(() => {
+      this.jobParser.parseDescription(
+        this.jobState.get(),
+        jobDescriptionContainer
+      );
+
+      handler();
+    }, 1000);
+
+    const jobDescriptionObserver = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.type === 'childList') {
+          handleJobDescriptionChanged();
+        }
+      }
+    });
+
+    jobDescriptionObserver.observe(jobDescriptionContainer, {
+      subtree: true,
+      childList: true,
+    });
   }
 }
 
