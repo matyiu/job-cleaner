@@ -33,9 +33,6 @@ export class DOMObserver {
     const callback = debounce(() => {
       const jobs = this.jobParser.parse(jobListContainer);
 
-      console.log(jobs, config);
-      debugger;
-
       jobs.forEach(job => {
         if (job.shouldHide(config)) {
           job.hide();

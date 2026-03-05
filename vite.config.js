@@ -26,8 +26,6 @@ export default defineConfig({
           })
         })
 
-        console.log(bundle);
-
         fs.writeFileSync(distManifest, JSON.stringify(manifest, null, 2));
       }
     },
