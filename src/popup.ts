@@ -7,9 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const cards = document.querySelectorAll<HTMLElement>('.feature-card');
 
   cards.forEach(async (card) => {
-    const dataKey: string = card.dataset.name;
-
-    const values: FieldValues = await getValueFromStorage(dataKey);
+    const dataKey = card.dataset.name;
 
     const toggle = card.querySelector<HTMLInputElement>('.toggle-trigger');
     const content = card.querySelector<HTMLElement>('.card-content');
@@ -17,9 +15,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const chipsBox = card.querySelector<HTMLElement>('.chips-box');
     const emptyMessage = card.querySelector<HTMLElement>('.empty-message');
 
-    if (!toggle || !content || !input || !chipsBox) {
+    if (!dataKey || !toggle || !content || !input || !chipsBox || !emptyMessage) {
       return;
     }
+
+    const values: FieldValues = await getValueFromStorage(dataKey);
 
     if (values.enabled) {
       content.classList.remove('hidden');
@@ -39,7 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function getValueFromStorage(dataKey: string): Promise<FieldValues> {
-  return (await chrome.storage.sync.get([dataKey]).then(result => result[dataKey])) ?? {
+  const values = await chrome.storage.sync.get([dataKey]) as { [dataKey]: FieldValues };
+  if (values[dataKey]) return values[dataKey];
+
+  return {
     enabled: false,
     data: [],
   };
