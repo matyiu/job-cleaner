@@ -1,7 +1,4 @@
-type FieldValues = {
-  enabled: boolean;
-  data: string[];
-}
+import type { FieldValues } from "./Config";
 
 document.addEventListener('DOMContentLoaded', () => {
   const cards = document.querySelectorAll<HTMLElement>('.feature-card');

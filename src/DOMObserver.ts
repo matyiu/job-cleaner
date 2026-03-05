@@ -1,3 +1,6 @@
+import type { JobParser } from "./JobParser";
+import type { Storage } from "./Storage";
+
 const JOB_SEARCH_LIST_DOM_SELECTOR = '.scaffold-layout__list';
 
 type Procedure = ((...args: unknown[]) => void) | (() => void);
@@ -17,15 +20,28 @@ function debounce(fn: Procedure, delayInMs: number) {
 export class DOMObserver {
   private observer: MutationObserver | undefined;
 
-  public init(): void {
-    const jobListContainer = document.querySelector(JOB_SEARCH_LIST_DOM_SELECTOR);
+  constructor(private readonly jobParser: JobParser, private readonly storage: Storage) { }
+
+  public async init(): Promise<void> {
+    const jobListContainer = document.querySelector(JOB_SEARCH_LIST_DOM_SELECTOR) as HTMLElement;
     if (!jobListContainer) {
       return;
     }
 
+    const config = await this.storage.get();
+
     const callback = debounce(() => {
-      alert('list refreshed!');
-    }, 5000);
+      const jobs = this.jobParser.parse(jobListContainer);
+
+      console.log(jobs, config);
+      debugger;
+
+      jobs.forEach(job => {
+        if (job.shouldHide(config)) {
+          job.hide();
+        }
+      });
+    }, 1000);
 
     this.observer = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
