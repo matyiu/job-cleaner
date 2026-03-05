@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "watch": "NODE_ENV=development vite build --watch"
   },
   "author": "",
   "license": "ISC",
