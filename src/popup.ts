@@ -1,1 +1,113 @@
-console.log("Hello!!");
+type FieldValues = {
+  enabled: boolean;
+  data: string[];
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const cards = document.querySelectorAll<HTMLElement>('.feature-card');
+
+  cards.forEach(async (card) => {
+    const dataKey: string = card.dataset.name;
+
+    const values: FieldValues = await getValueFromStorage(dataKey);
+
+    const toggle = card.querySelector<HTMLInputElement>('.toggle-trigger');
+    const content = card.querySelector<HTMLElement>('.card-content');
+    const input = card.querySelector<HTMLInputElement>('.chip-input');
+    const chipsBox = card.querySelector<HTMLElement>('.chips-box');
+    const emptyMessage = card.querySelector<HTMLElement>('.empty-message');
+
+    if (!toggle || !content || !input || !chipsBox) {
+      return;
+    }
+
+    if (values.enabled) {
+      content.classList.remove('hidden');
+      toggle.checked = true;
+    }
+
+    if (values.data.length > 0) {
+      emptyMessage.classList.add('hidden');
+    }
+
+    values.data.forEach((keyword) => renderChip(dataKey, keyword, chipsBox))
+
+    toggle.addEventListener('change', toggleField.bind(null, dataKey, content));
+
+    input.addEventListener('keydown', inputChange.bind(null, dataKey, chipsBox));
+  });
+});
+
+async function getValueFromStorage(dataKey: string): Promise<FieldValues> {
+  return (await chrome.storage.sync.get([dataKey]).then(result => result[dataKey])) ?? {
+    enabled: false,
+    data: [],
+  };
+}
+
+async function toggleField(dataKey: string, content: HTMLElement) {
+  const values = await getValueFromStorage(dataKey);
+  values.enabled = !values.enabled;
+
+  await chrome.storage.sync.set({ [dataKey]: values });
+
+  if (values.enabled) {
+    content.classList.remove('hidden');
+  } else {
+    content.classList.add('hidden');
+  }
+}
+
+async function inputChange(dataKey: string, chipsBox: HTMLElement, e: KeyboardEvent) {
+  if (e.key !== 'Enter') return;
+
+  const input = e.target as HTMLInputElement;
+  const introducedKeywords = input.value.trim().split(',').map(key => key.trim());
+
+  if (introducedKeywords.length === 0) return;
+
+  const values = await getValueFromStorage(dataKey);
+
+  introducedKeywords.forEach((introducedKeyword) => {
+    if (values.data.findIndex(keyword => keyword === introducedKeyword) >= 0) {
+      return;
+    }
+
+    values.data.push(introducedKeyword);
+
+    renderChip(dataKey, introducedKeyword, chipsBox);
+  });
+
+  chipsBox.children[0]?.classList.add('hidden');
+
+  input.value = '';
+
+  await chrome.storage.sync.set({ [dataKey]: values });
+}
+
+function renderChip(dataKey: string, keyword: string, chipsBox: HTMLElement) {
+  const chip = document.createElement('div');
+  chip.className = 'chip';
+
+  chip.innerHTML = `
+        <span>${keyword}</span>
+        <button type="button" class="remove-chip">&times;</button>
+    `;
+
+  chip.querySelector('.remove-chip')?.addEventListener('click', async () => {
+    const values = await getValueFromStorage(dataKey);
+
+    values.data.splice(values.data.findIndex(item => item === keyword), 1);
+
+    await chrome.storage.sync.set({ [dataKey]: values });
+
+    chip.remove();
+
+    if (values.data.length === 0) {
+      chipsBox.children[0]?.classList.remove('hidden');
+    }
+  });
+
+  chipsBox.appendChild(chip);
+}
+

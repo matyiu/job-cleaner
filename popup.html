@@ -1,9 +1,68 @@
-<html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Job Cleanr</title>
+  <link rel="stylesheet" href="./src/popup.css">
+</head>
 
 <body>
-  <h1>Hello World!</h1>
+  <div class="container">
+    <header>
+      <h1>Job Cleaner</h1>
+    </header>
 
-  <script src="src/popup.ts" type="module"></script>
+    <main>
+      <section class="feature-card" data-name="keywords">
+        <div class="card-header">
+          <span class="label">Keywords</span>
+          <label class="switch">
+            <input type="checkbox" class="toggle-trigger">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="card-content hidden">
+          <input type="text" placeholder="Add a keyword..." class="chip-input">
+          <div class="chips-box">
+            <span class="empty-message">No keywords has been added...</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="feature-card" data-name="companies">
+        <div class="card-header">
+          <span class="label">Companies</span>
+          <label class="switch">
+            <input type="checkbox" class="toggle-trigger">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="card-content hidden">
+          <input type="text" placeholder="Add a company..." class="chip-input">
+          <div class="chips-box">
+            <span class="empty-message">No companies has been added...</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="feature-card" data-name="whitelist">
+        <div class="card-header">
+          <span class="label">Whitelist</span>
+          <label class="switch">
+            <input type="checkbox" class="toggle-trigger">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="card-content hidden">
+          <input type="text" placeholder="Add whitelisted keywords..." class="chip-input">
+          <div class="chips-box">
+            <span class="empty-message">No whitelisted keywords has been added...</span>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="./src/popup.ts" type="module"></script>
 </body>
 
 </html>

@@ -6,6 +6,9 @@
   "action": {
     "default_popup": "popup.html"
   },
+  "permissions": [
+    "storage"
+  ],
   "content_scripts": [
     {
       "matches": ["https://www.linkedin.com/jobs/search/*"],
