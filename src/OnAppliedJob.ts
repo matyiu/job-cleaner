@@ -1,5 +1,5 @@
 import type { JobState } from "./JobState";
-import { AutoAdvancer } from "./AutoAdvancer";
+import { AdvanceEvent, AutoAdvancer } from "./AutoAdvancer";
 import { HideJob } from "./HideJob";
 
 const JOB_DETAILS_CONTAINER_SELECTOR = '.jobs-search__job-details--container';
@@ -22,7 +22,7 @@ export class OnAppliedJob {
     }
 
     const jobs = this.jobState.get();
-    const visibleJobs = jobs.filter(job => !job.shouldHide());
+    const visibleJobs = jobs.filter(job => !job.isHidden());
     const currentJob = visibleJobs.find(job => job.title === ariaLabel);
     if (!currentJob) {
       return;
@@ -31,6 +31,6 @@ export class OnAppliedJob {
     const currentJobIndex = visibleJobs.findIndex(job => job.id === currentJob.id);
 
     this.hideJob.execute(currentJob);
-    this.autoAdvancer.advance(visibleJobs[currentJobIndex + 1]);
+    this.autoAdvancer.advance(visibleJobs[currentJobIndex + 1], AdvanceEvent.APPLIED);
   }
 }

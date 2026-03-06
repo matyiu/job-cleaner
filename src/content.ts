@@ -14,7 +14,7 @@ const jobState = new JobState();
 const hideJob = new HideJob(storage);
 const autoAdvancer = new AutoAdvancer(storage);
 const onAppliedJob = new OnAppliedJob(jobState, autoAdvancer, hideJob);
-const domObserver = new DOMObserver(jobParser, jobState, onAppliedJob);
+const domObserver = new DOMObserver(jobParser, jobState, onAppliedJob, autoAdvancer);
 
 domObserver.init(handleJobFilter);
 

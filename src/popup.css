@@ -193,6 +193,13 @@ input:checked+.slider:before {
   font-size: 0.9rem;
 }
 
+.feature-description {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+}
+
 .delay-input {
   width: 80px;
   background: #2a2a2a;
