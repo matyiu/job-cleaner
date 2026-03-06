@@ -21,6 +21,14 @@ export class Job {
     this.post.style.display = '';
   }
 
+  select(): void {
+    (this.post.querySelector('*[data-job-id]') as HTMLElement).click();
+  }
+
+  isHidden(): boolean {
+    return this.post.style.display === 'none';
+  }
+
   shouldHide({ keywords, companies, whitelist, hiddenJobs }: Config): boolean {
     const wasHiddenBefore = hiddenJobs.data.findIndex(id => id === this.id) > -1;
     if (wasHiddenBefore) {

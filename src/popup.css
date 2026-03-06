@@ -184,3 +184,25 @@ input:checked+.slider:before {
     transform: translateY(0);
   }
 }
+
+.delay-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.delay-input {
+  width: 80px;
+  background: #2a2a2a;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: white;
+  outline: none;
+}
+
+.delay-input:focus {
+  border-color: var(--accent);
+}

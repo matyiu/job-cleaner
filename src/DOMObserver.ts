@@ -1,5 +1,6 @@
 import type { JobParser } from "./JobParser";
 import type { JobState } from "./JobState";
+import type { OnAppliedJob } from "./OnAppliedJob";
 
 const JOB_SEARCH_LIST_DOM_SELECTOR = '.scaffold-layout__list';
 const JOB_DESCRIPTION_SELECTOR = '.jobs-search__job-details--container';
@@ -22,6 +23,7 @@ export class DOMObserver {
   constructor(
     private readonly jobParser: JobParser,
     private readonly jobState: JobState,
+    private readonly onAppliedJob?: OnAppliedJob,
   ) { }
 
   public async init(handler: Procedure): Promise<void> {
@@ -63,6 +65,8 @@ export class DOMObserver {
       );
 
       handler();
+
+      this.onAppliedJob?.handle();
     }, 1000);
 
     const jobDescriptionObserver = new MutationObserver((mutations) => {
@@ -79,4 +83,3 @@ export class DOMObserver {
     });
   }
 }
-

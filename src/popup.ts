@@ -1,4 +1,4 @@
-import type { FieldValues } from "./Config";
+import type { FieldValues, AutoAdvanceConfig } from "./Config";
 import { CONFIG_UPDATED } from "./events";
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -34,7 +34,63 @@ document.addEventListener('DOMContentLoaded', () => {
 
     input.addEventListener('keydown', inputChange.bind(null, dataKey, chipsBox));
   });
+
+  setupAutoAdvance();
 });
+
+async function setupAutoAdvance() {
+  const card = document.querySelector<HTMLElement>('.feature-card[data-name="autoAdvance"]');
+  if (!card) return;
+
+  const dataKey = 'autoAdvance';
+  const toggle = card.querySelector<HTMLInputElement>('.toggle-trigger');
+  const content = card.querySelector<HTMLElement>('.card-content');
+  const delayInput = card.querySelector<HTMLInputElement>('.delay-input');
+
+  if (!toggle || !content || !delayInput) return;
+
+  const config = await getAutoAdvanceFromStorage();
+
+  if (config.enabled) {
+    content.classList.remove('hidden');
+    toggle.checked = true;
+  }
+
+  delayInput.value = String(config.delay);
+
+  toggle.addEventListener('change', async () => {
+    const currentConfig = await getAutoAdvanceFromStorage();
+    currentConfig.enabled = toggle.checked;
+
+    await chrome.storage.sync.set({ [dataKey]: currentConfig });
+
+    if (currentConfig.enabled) {
+      content.classList.remove('hidden');
+    } else {
+      content.classList.add('hidden');
+    }
+
+    configChanged();
+  });
+
+  delayInput.addEventListener('change', async () => {
+    const currentConfig = await getAutoAdvanceFromStorage();
+    currentConfig.delay = parseInt(delayInput.value, 10) || 500;
+
+    await chrome.storage.sync.set({ [dataKey]: currentConfig });
+    configChanged();
+  });
+}
+
+async function getAutoAdvanceFromStorage(): Promise<AutoAdvanceConfig> {
+  const values = await chrome.storage.sync.get(['autoAdvance']) as { autoAdvance: AutoAdvanceConfig };
+  if (values.autoAdvance) return values.autoAdvance;
+
+  return {
+    enabled: false,
+    delay: 500,
+  };
+}
 
 async function getValueFromStorage(dataKey: string): Promise<FieldValues> {
   const values = await chrome.storage.sync.get([dataKey]) as { [dataKey]: FieldValues };
