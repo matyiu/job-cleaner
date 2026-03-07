@@ -14,12 +14,11 @@ export class AutoAdvancer {
   ) { }
 
   public async advance(nextJob: Job | undefined, event: AdvanceEvent = AdvanceEvent.FILTER_HIDDEN): Promise<void> {
+    const config = await this.storage.get();
+
     if (event === AdvanceEvent.APPLIED) {
-      const config = await this.storage.get();
       if (!config.autoAdvance.enabled) return;
     }
-
-    const config = await this.storage.get();
 
     const delay = event === AdvanceEvent.FILTER_HIDDEN ? 0 : config.autoAdvance.delay;
 
