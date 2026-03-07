@@ -4,6 +4,7 @@ const JOB_POST_SELECTOR = "li[data-occludable-job-id]";
 const JOB_POST_TITLE_SELECTOR = ".job-card-list__title--link strong";
 const JOB_POST_COMPANY_SELECTOR = ".artdeco-entity-lockup__subtitle";
 const JOB_DESCRIPTION_SELECTOR = "#job-details";
+const JOB_DESCRIPTION_CONTAINER_SELECTOR = '.jobs-search__job-details--container';
 
 export class JobParser {
   public parseList(jobListContainer: HTMLElement): Job[] {
@@ -25,9 +26,9 @@ export class JobParser {
     return jobs;
   }
 
-  public parseDescription(jobs: Job[], jobDescriptionContainer: HTMLElement): void {
-    const jobDescription = jobDescriptionContainer.querySelector(JOB_DESCRIPTION_SELECTOR) as HTMLElement;
-    const ariaLabel = jobDescriptionContainer.ariaLabel?.trim();
+  public parseDescription(jobs: Job[], wrapper: HTMLElement): void {
+    const jobDescription = wrapper.querySelector(JOB_DESCRIPTION_SELECTOR) as HTMLElement;
+    const ariaLabel = wrapper.querySelector(JOB_DESCRIPTION_CONTAINER_SELECTOR)?.ariaLabel?.trim();
 
     jobs.forEach((job) => {
       if (job.title === ariaLabel) {

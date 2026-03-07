@@ -1,10 +1,9 @@
 import type { JobParser } from "./JobParser";
 import type { JobState } from "./JobState";
 import type { OnAppliedJob } from "./OnAppliedJob";
-import { AdvanceEvent, AutoAdvancer } from "./AutoAdvancer";
 
 const JOB_SEARCH_LIST_DOM_SELECTOR = '.scaffold-layout__list';
-const JOB_DESCRIPTION_SELECTOR = '.jobs-search__job-details--container';
+const JOB_DESCRIPTION_SELECTOR = '.jobs-search__job-details';
 
 type Procedure = ((...args: unknown[]) => void) | (() => void);
 
@@ -25,7 +24,6 @@ export class DOMObserver {
     private readonly jobParser: JobParser,
     private readonly jobState: JobState,
     private readonly onAppliedJob?: OnAppliedJob,
-    private readonly autoAdvancer?: AutoAdvancer,
   ) { }
 
   public async init(handler: Procedure): Promise<void> {
@@ -69,21 +67,6 @@ export class DOMObserver {
       handler();
 
       this.onAppliedJob?.handle();
-
-      if (this.autoAdvancer) {
-        const currentJobTitle = jobDescriptionContainer.ariaLabel?.trim();
-        if (!currentJobTitle) return;
-
-        const jobs = this.jobState.get();
-        const currentJob = jobs.find(job => job.title === currentJobTitle);
-        if (!currentJob) return;
-
-        if (currentJob.isHidden()) {
-          const visibleJobs = jobs.filter(job => !job.isHidden());
-          const currentJobIndex = visibleJobs.findIndex(job => job.id === currentJob.id);
-          this.autoAdvancer.advance(visibleJobs[currentJobIndex + 1], AdvanceEvent.FILTER_HIDDEN);
-        }
-      }
     }, 1000);
 
     const jobDescriptionObserver = new MutationObserver((mutations) => {
