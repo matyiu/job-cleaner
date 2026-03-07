@@ -11,9 +11,11 @@ The other reason for building this extension is just for learning how to build a
 - **Keyword Filtering** - Hide jobs based on keywords in job titles and descriptions
 - **Company Filtering** - Hide jobs from specific companies
 - **Whitelist** - Create exceptions to show jobs even if they match blocked keywords
-- **Persistent Storage** - All settings are synced across your Chrome profile using `chrome.storage.sync` (except the hidden job list due to limits in the number of items stored)
+- **Persistent Storage** - All settings are synced across your Chrome profile using `chrome.storage.sync`
 - **Real-time Filtering** - Automatically filters jobs as they load on the page
 - **Automatic Detection** - Uses MutationObserver to detect new jobs loaded dynamically as you scroll
+- **Auto-Advance** - Automatically advances to the next job after applying (disable by default) or when a job is filtered out
+- **Applied Job Handling** - Detects when you've applied to a job and automatically hides it
 
 ## Manual Installation
 
@@ -70,14 +72,18 @@ The built extension will be in the `dist/` directory. Load this directory into C
 
 ### Architecture
 
-- `content.ts` - Content script that runs on LinkedIn Jobs pages
+- `content.ts` - Content script that runs on LinkedIn Jobs pages, orchestrates filtering and job handling
 - `popup.ts` - Popup UI logic for managing filters
 - `JobParser.ts` - Parses job elements from the DOM
 - `Job.ts` - Job entity with filtering logic
 - `JobState.ts` - In-memory job state management
 - `Storage.ts` - Chrome storage abstraction
 - `Config.ts` - Configuration types
-- `DOMObserver.ts` - MutationObserver for detecting DOM changes in the job listings and description as you open each post
+- `DOMObserver.ts` - MutationObserver for detecting DOM changes in job listings and descriptions
+- `AutoAdvancer.ts` - Auto-advance logic to move to next job after applying or when filtered
+- `HideJob.ts` - Handles permanently hiding jobs
+- `OnAppliedJob.ts` - Detects and handles job applications
+- `events.ts` - Event type definitions
 
 ### Manifest
 
