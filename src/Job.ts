@@ -13,6 +13,10 @@ export class Job {
     this.description = description;
   }
 
+  getDescription(): string | undefined {
+    return this.description;
+  }
+
   hide(): void {
     this.post.style.display = 'none';
   }
