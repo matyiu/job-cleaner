@@ -3,13 +3,20 @@ export type FieldValues = {
   data: string[];
 }
 
+export type KeywordConfig = {
+  enabled: boolean;
+  anywhere: string[];
+  title: string[];
+  description: string[];
+}
+
 export type AutoAdvanceConfig = {
   enabled: boolean;
   delay: number;
 }
 
 export type Config = {
-  keywords: FieldValues;
+  keywords: KeywordConfig;
   companies: FieldValues;
   whitelist: FieldValues;
   hiddenJobs: FieldValues;

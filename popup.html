@@ -22,9 +22,38 @@
           </label>
         </div>
         <div class="card-content hidden">
-          <input type="text" placeholder="Add a keyword..." class="chip-input">
-          <div class="chips-box">
-            <span class="empty-message">No keywords has been added...</span>
+          <div class="keyword-subsection" data-category="anywhere">
+            <div class="subsection-header">
+              <span class="subsection-label">Anywhere</span>
+            </div>
+            <div class="subsection-content expanded">
+              <input type="text" placeholder="Add a keyword..." class="chip-input">
+              <div class="chips-box" data-dropzone="anywhere">
+                <span class="empty-message">No keywords has been added...</span>
+              </div>
+            </div>
+          </div>
+          <div class="keyword-subsection" data-category="title">
+            <div class="subsection-header">
+              <span class="subsection-label">Title</span>
+            </div>
+            <div class="subsection-content">
+              <input type="text" placeholder="Add a title keyword..." class="chip-input">
+              <div class="chips-box" data-dropzone="title">
+                <span class="empty-message">No title keywords has been added...</span>
+              </div>
+            </div>
+          </div>
+          <div class="keyword-subsection" data-category="description">
+            <div class="subsection-header">
+              <span class="subsection-label">Description</span>
+            </div>
+            <div class="subsection-content">
+              <input type="text" placeholder="Add a description keyword..." class="chip-input">
+              <div class="chips-box" data-dropzone="description">
+                <span class="empty-message">No description keywords has been added...</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>

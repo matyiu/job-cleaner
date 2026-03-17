@@ -1,4 +1,4 @@
-import type { Config } from "./Config";
+import type { Config, KeywordConfig } from "./Config";
 
 export class Job {
   constructor(
@@ -50,13 +50,55 @@ export class Job {
     const keywordMatch = (keyword: string): boolean => {
       const escapedKeyword = keyword.replaceAll(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-      const regex = new RegExp(`(?<![a-zA-Z0-9])${escapedKeyword}(?![a-zA-Z0-9+#.])`, 'i');
+      const regex = this.createKeywordRegex(escapedKeyword);
 
       return regex.test(this.title) || regex.test(this.description ?? '');
     }
 
-    if (whitelist.enabled && whitelist.data.some(keywordMatch)) return false;
+    if (whitelist.enabled && this.matchesWhitelist(whitelist.data)) return false;
 
-    return keywords.enabled && keywords.data.some(keywordMatch);
+    return keywords.enabled && this.matchesKeywords(keywords);
+  }
+
+  private matchesWhitelist(whitelist: string[]): boolean {
+    return whitelist.some((keyword: string) => {
+      const regex = this.createKeywordRegex(keyword);
+
+      return regex.test(this.title) || regex.test(this.description ?? '');
+    });
+  }
+
+  private matchesKeywords(keywords: KeywordConfig): boolean {
+    const matchesTitle = (keyword: string) => {
+      const regex = this.createKeywordRegex(keyword);
+
+      return regex.test(this.title);
+    };
+
+    const matchesDescription = (keyword: string) => {
+      const regex = this.createKeywordRegex(keyword);
+
+      return regex.test(this.description ?? '');
+    };
+
+    if (keywords.anywhere.some(keyword => matchesTitle(keyword) || matchesDescription(keyword))) {
+      return true;
+    }
+
+    if (keywords.title.some(matchesTitle)) {
+      return true;
+    }
+
+    if (keywords.description.some(matchesDescription)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private createKeywordRegex(keyword: string): RegExp {
+    const escapedKeyword = keyword.replaceAll(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    return new RegExp(`(?<![a-zA-Z0-9])${escapedKeyword}(?![a-zA-Z0-9+#.])`, 'i');
   }
 }
