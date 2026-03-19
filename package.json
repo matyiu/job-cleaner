@@ -4,7 +4,9 @@
   "main": "index.js",
   "scripts": {
     "build": "vite build",
-    "watch": "NODE_ENV=development vite build --watch"
+    "watch": "NODE_ENV=development vite build --watch",
+    "test": "vitest",
+    "test:watch": "vitest --watch"
   },
   "author": "",
   "license": "ISC",
@@ -13,8 +15,11 @@
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.3.0",
     "@types/chrome": "^0.1.37",
+    "@vitest/ui": "^4.1.0",
+    "jsdom": "^29.0.0",
     "tsc": "^2.0.4",
     "typescript": "^5.9.3",
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "vitest": "^4.1.0"
   }
 }
