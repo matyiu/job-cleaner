@@ -3,7 +3,7 @@ import { AdvanceEvent, AutoAdvancer } from "./AutoAdvancer";
 import { HideJob } from "./HideJob";
 
 const JOB_DETAILS_CONTAINER_SELECTOR = '.jobs-search__job-details--container';
-const JOB_DETAILS_APPLIED_SELECTOR = '.jobs-s-apply a[href*="jobs/tracker/applied"]';
+const JOB_DETAILS_APPLIED_SELECTOR = '.jobs-s-apply a[href*="jobs-tracker"]';
 
 export class OnAppliedJob {
   constructor(
