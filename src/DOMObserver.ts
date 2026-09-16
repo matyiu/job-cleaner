@@ -2,8 +2,8 @@ import type { JobParser } from "./JobParser";
 import type { JobState } from "./JobState";
 import type { OnAppliedJob } from "./OnAppliedJob";
 
-const JOB_SEARCH_LIST_DOM_SELECTOR = '.scaffold-layout__list';
-const JOB_DESCRIPTION_SELECTOR = '.jobs-search__job-details';
+const JOB_SEARCH_LIST_DOM_SELECTOR = '.scaffold-layout__list, [componentkey="SearchResultsMainContent"], [data-component-type="LazyColumn"], [data-testid="lazy-column"]';
+const JOB_DESCRIPTION_SELECTOR = '.jobs-search__job-details, #job-details';
 
 type Procedure = ((...args: unknown[]) => void) | (() => void);
 

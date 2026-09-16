@@ -13,7 +13,10 @@ export default defineManifest({
   ],
   "content_scripts": [
     {
-      "matches": ["https://www.linkedin.com/jobs/search/*"],
+      "matches": [
+        "https://www.linkedin.com/jobs/search/*",
+        "https://www.linkedin.com/jobs/search-results/*"
+      ],
       "js": ["./src/content.ts"]
     }
   ]

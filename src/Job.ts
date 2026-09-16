@@ -26,7 +26,14 @@ export class Job {
   }
 
   select(): void {
-    (this.post.querySelector('*[data-job-id]') as HTMLElement).click();
+    const clickable = (
+      this.post.querySelector('*[data-job-id]') ||
+      (this.post.getAttribute('role') === 'button' ? this.post : null) ||
+      this.post.querySelector('[role="button"]') ||
+      this.post
+    ) as HTMLElement;
+
+    clickable?.click();
   }
 
   isHidden(): boolean {
