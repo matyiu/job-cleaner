@@ -28,30 +28,37 @@ async function handleJobFilter() {
   const config = await storage.get();
 
   const jobs = jobState.get();
+  if (jobs.length === 0) {
+    return;
+  }
 
   const currentJobId = new URLSearchParams(window.location.search).get('currentJobId');
 
-  jobs.forEach((job: Job, index: number) => {
+  jobs.forEach((job: Job) => {
     job.onDismiss(() => {
       hideJob.execute(job);
     });
 
-    if (job.isApplied()) {
-      hideJob.execute(job);
-
-      if (job.id === currentJobId) {
-        const nextVisibleJob = jobs.slice(index + 1).find(j => !j.isHidden());
-        autoAdvancer.advance(nextVisibleJob, AdvanceEvent.FILTER_HIDDEN);
-      }
-    } else if (job.shouldHide(config)) {
+    if (job.isApplied() || job.shouldHide(config)) {
       job.hide();
-
-      if (job.id === currentJobId) {
-        const nextVisibleJob = jobs.slice(index + 1).find(j => !j.isHidden());
-        autoAdvancer.advance(nextVisibleJob, AdvanceEvent.FILTER_HIDDEN);
-      }
     } else {
       job.show();
     }
   });
+
+  const visibleJobs = jobs.filter(job => !job.isHidden());
+
+  if (visibleJobs.length === 0) {
+    autoAdvancer.advance(undefined, AdvanceEvent.FILTER_HIDDEN);
+    return;
+  }
+
+  if (currentJobId) {
+    const currentJob = jobs.find(j => j.id === currentJobId);
+    if (currentJob && currentJob.isHidden()) {
+      const currentJobIndex = jobs.findIndex(j => j.id === currentJobId);
+      const nextVisibleJob = jobs.slice(currentJobIndex + 1).find(j => !j.isHidden()) || visibleJobs[0];
+      autoAdvancer.advance(nextVisibleJob, AdvanceEvent.FILTER_HIDDEN);
+    }
+  }
 }
