@@ -36,6 +36,8 @@ describe('Storage', () => {
         .withKeywords({ enabled: true, anywhere: ['senior'], title: [], description: [] })
         .withCompanies({ enabled: true, data: ['google'] })
         .withWhitelist({ enabled: true, data: ['meta'] })
+        .withLocations({ enabled: true, mode: 'blacklist', data: ['Barcelona'] })
+        .withWorkplaceTypes({ enabled: true, types: ['remote', 'hybrid'] })
         .withHiddenJobs({ enabled: true, data: ['job-1', 'job-2'] })
         .withAutoAdvance({ enabled: true, delay: 1000 })
         .build();
@@ -44,6 +46,8 @@ describe('Storage', () => {
         keywords: config.keywords,
         companies: config.companies,
         whitelist: config.whitelist,
+        locations: config.locations,
+        workplaceTypes: config.workplaceTypes,
         autoAdvance: config.autoAdvance,
       });
       vi.mocked(chrome.storage.local.get).mockResolvedValue({

@@ -5,6 +5,7 @@ export class JobMother {
   private title: string;
   private company: string;
   private description?: string;
+  private location?: string;
   private post: HTMLElement;
   private button: HTMLElement;
 
@@ -51,11 +52,17 @@ export class JobMother {
     return this;
   }
 
+  withLocation(location: string): JobMother {
+    this.location = location;
+    return this;
+  }
+
   build(): Job {
-    const job = new Job(this.id, this.title, this.company, this.post);
+    const job = new Job(this.id, this.title, this.company, this.post, undefined, this.location);
     if (this.description) {
       job.updateDescription(this.description);
     }
     return job;
   }
 }
+

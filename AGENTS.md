@@ -18,3 +18,14 @@ This ensures:
 
 ### No Index Files
 The usage of `index.ts` files is explicitly prohibited for any folder. Always import directly from the specific file.
+
+## Versioning
+
+### Increment Patch Version
+It is crucial to always increment the patch version (SemVer) after every change or new feature.
+
+Ensure the patch version is updated across:
+- `package.json` (`version`)
+- `manifest.config.js` (`version` and `description`)
+- `popup.html` (`#version-label`)
+

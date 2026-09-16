@@ -90,6 +90,53 @@
         </div>
       </section>
 
+      <section class="feature-card" data-name="locations">
+        <div class="card-header">
+          <span class="label">Location</span>
+          <label class="switch">
+            <input type="checkbox" class="toggle-trigger">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="card-content hidden">
+          <div class="mode-selector">
+            <button type="button" class="mode-btn active" data-mode="blacklist">Blacklist</button>
+            <button type="button" class="mode-btn" data-mode="whitelist">Whitelist</button>
+          </div>
+          <input type="text" placeholder="Add a location..." class="chip-input">
+          <div class="chips-box">
+            <span class="empty-message">No locations has been added...</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="feature-card" data-name="workplaceTypes">
+        <div class="card-header">
+          <span class="label">Workplace Type</span>
+          <label class="switch">
+            <input type="checkbox" class="toggle-trigger">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="card-content hidden">
+          <p class="feature-description">Select allowed work modalities:</p>
+          <div class="workplace-types-group">
+            <label class="type-badge">
+              <input type="checkbox" value="remote" class="workplace-type-checkbox">
+              <span>Remote</span>
+            </label>
+            <label class="type-badge">
+              <input type="checkbox" value="hybrid" class="workplace-type-checkbox">
+              <span>Hybrid</span>
+            </label>
+            <label class="type-badge">
+              <input type="checkbox" value="on-site" class="workplace-type-checkbox">
+              <span>On-site</span>
+            </label>
+          </div>
+        </div>
+      </section>
+
       <section class="feature-card" data-name="autoAdvance">
         <div class="card-header">
           <span class="label">Auto Advance After Applying</span>
@@ -108,7 +155,7 @@
       </section>
     </main>
     <footer class="popup-footer">
-      <span id="version-label">v1.0.1</span>
+      <span id="version-label">v1.0.2</span>
     </footer>
   </div>
   <script src="./src/popup.ts" type="module"></script>

@@ -293,3 +293,64 @@ input:checked+.slider:before {
   font-size: 0.75rem;
   color: var(--text-secondary);
 }
+
+.mode-selector {
+  display: flex;
+  background: #2a2a2a;
+  border-radius: 8px;
+  padding: 3px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+}
+
+.mode-btn {
+  flex: 1;
+  background: transparent;
+  color: var(--text-secondary);
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mode-btn.active {
+  background: var(--accent);
+  color: #121212;
+  font-weight: 600;
+}
+
+.workplace-types-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.type-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #2a2a2a;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.type-badge:has(input:checked) {
+  background: rgba(187, 134, 252, 0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.workplace-type-checkbox {
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+

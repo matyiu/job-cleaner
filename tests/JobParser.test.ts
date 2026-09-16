@@ -64,9 +64,14 @@ describe('JobParser', () => {
     expect(jobs[0].id).toBe('4455778043');
     expect(jobs[0].title).toBe('Full Stack Developer');
     expect(jobs[0]['company']).toBe('Annapurna');
+    expect(jobs[0].getLocation()).toBe('Berlín, Alemania (En remoto)');
+    expect(jobs[0].getWorkplaceType()).toBe('remote');
 
     expect(jobs[1].id).toBe('4298176847');
     expect(jobs[1].title).toBe('Senior Fullstack TS Developer (backend-oriented)');
     expect(jobs[1]['company']).toBe('lemlist');
+    expect(jobs[1].getLocation()).toBe('Marsella (En remoto)');
+    expect(jobs[1].getWorkplaceType()).toBe('remote');
   });
 });
+

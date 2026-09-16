@@ -220,4 +220,97 @@ describe('Job', () => {
       expect(dismissed).toBe(true);
     });
   });
+
+  describe('getWorkplaceType', () => {
+    it('should detect remote modality from location or title or post text', () => {
+      const job1 = JobMother.create().withLocation('Madrid (En remoto)').build();
+      const job2 = JobMother.create().withTitle('Fullstack Engineer - Remote').build();
+
+      expect(job1.getWorkplaceType()).toBe('remote');
+      expect(job2.getWorkplaceType()).toBe('remote');
+    });
+
+    it('should detect hybrid modality', () => {
+      const job = JobMother.create().withLocation('Barcelona (Híbrido)').build();
+
+      expect(job.getWorkplaceType()).toBe('hybrid');
+    });
+
+    it('should default to on-site modality when no remote/hybrid tag is found', () => {
+      const job = JobMother.create().withLocation('Madrid, España').build();
+
+      expect(job.getWorkplaceType()).toBe('on-site');
+    });
+  });
+
+  describe('filtering by workplaceType', () => {
+    it('should hide job when job modality is not in allowed workplaceTypes', () => {
+      const job = JobMother.create().withLocation('Madrid (Presencial)').build();
+      const config = ConfigMother.create().withWorkplaceTypes({
+        enabled: true,
+        types: ['remote', 'hybrid'],
+      }).build();
+
+      expect(job.shouldHide(config)).toBe(true);
+    });
+
+    it('should keep job when job modality matches selected workplaceTypes combination', () => {
+      const jobRemote = JobMother.create().withLocation('Madrid (En remoto)').build();
+      const jobHybrid = JobMother.create().withLocation('Madrid (Híbrido)').build();
+      const config = ConfigMother.create().withWorkplaceTypes({
+        enabled: true,
+        types: ['remote', 'hybrid'],
+      }).build();
+
+      expect(jobRemote.shouldHide(config)).toBe(false);
+      expect(jobHybrid.shouldHide(config)).toBe(false);
+    });
+  });
+
+  describe('filtering by location', () => {
+    it('should hide job matching location in blacklist mode', () => {
+      const job = JobMother.create().withLocation('Barcelona, España').build();
+      const config = ConfigMother.create().withLocations({
+        enabled: true,
+        mode: 'blacklist',
+        data: ['Barcelona'],
+      }).build();
+
+      expect(job.shouldHide(config)).toBe(true);
+    });
+
+    it('should not hide job not matching location in blacklist mode', () => {
+      const job = JobMother.create().withLocation('Madrid, España').build();
+      const config = ConfigMother.create().withLocations({
+        enabled: true,
+        mode: 'blacklist',
+        data: ['Barcelona'],
+      }).build();
+
+      expect(job.shouldHide(config)).toBe(false);
+    });
+
+    it('should hide job not matching location in whitelist mode', () => {
+      const job = JobMother.create().withLocation('Barcelona, España').build();
+      const config = ConfigMother.create().withLocations({
+        enabled: true,
+        mode: 'whitelist',
+        data: ['Madrid'],
+      }).build();
+
+      expect(job.shouldHide(config)).toBe(true);
+    });
+
+    it('should keep job matching location in whitelist mode', () => {
+      const job = JobMother.create().withLocation('Madrid, España').build();
+      const config = ConfigMother.create().withLocations({
+        enabled: true,
+        mode: 'whitelist',
+        data: ['Madrid'],
+      }).build();
+
+      expect(job.shouldHide(config)).toBe(false);
+    });
+  });
 });
+

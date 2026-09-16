@@ -4,6 +4,8 @@ export class ConfigMother {
   private keywords: Config['keywords'];
   private companies: Config['companies'];
   private whitelist: Config['whitelist'];
+  private locations: Config['locations'];
+  private workplaceTypes: Config['workplaceTypes'];
   private hiddenJobs: Config['hiddenJobs'];
   private autoAdvance: Config['autoAdvance'];
 
@@ -15,6 +17,8 @@ export class ConfigMother {
     this.keywords = { enabled: false, anywhere: [], title: [], description: [] };
     this.companies = { enabled: false, data: [] };
     this.whitelist = { enabled: false, data: [] };
+    this.locations = { enabled: false, mode: 'blacklist', data: [] };
+    this.workplaceTypes = { enabled: false, types: ['remote', 'hybrid', 'on-site'] };
     this.hiddenJobs = { enabled: false, data: [] };
     this.autoAdvance = { enabled: false, delay: 500 };
   }
@@ -34,6 +38,16 @@ export class ConfigMother {
     return this;
   }
 
+  withLocations(locations: Config['locations']): ConfigMother {
+    this.locations = locations;
+    return this;
+  }
+
+  withWorkplaceTypes(workplaceTypes: Config['workplaceTypes']): ConfigMother {
+    this.workplaceTypes = workplaceTypes;
+    return this;
+  }
+
   withHiddenJobs(hiddenJobs: Config['hiddenJobs']): ConfigMother {
     this.hiddenJobs = hiddenJobs;
     return this;
@@ -49,8 +63,11 @@ export class ConfigMother {
       keywords: this.keywords,
       companies: this.companies,
       whitelist: this.whitelist,
+      locations: this.locations,
+      workplaceTypes: this.workplaceTypes,
       hiddenJobs: this.hiddenJobs,
       autoAdvance: this.autoAdvance,
     };
   }
 }
+

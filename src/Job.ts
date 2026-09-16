@@ -1,4 +1,4 @@
-import type { Config, KeywordConfig } from "./Config";
+import type { Config, KeywordConfig, WorkplaceType } from "./Config";
 
 export class Job {
   constructor(
@@ -7,6 +7,7 @@ export class Job {
     private readonly company: string,
     private readonly post: HTMLElement,
     private description?: string,
+    private readonly location?: string,
   ) { }
 
   updateDescription(description: string): void {
@@ -15,6 +16,30 @@ export class Job {
 
   getDescription(): string | undefined {
     return this.description;
+  }
+
+  getLocation(): string | undefined {
+    return this.location;
+  }
+
+  getWorkplaceType(): WorkplaceType {
+    const combinedText = [
+      this.location ?? '',
+      this.title,
+      this.post.textContent ?? '',
+      this.description ?? ''
+    ].join(' ');
+
+    const remoteRegex = /(en\s+remoto|remoto|remote|teletrabajo|work\s+from\s+home|100%\s+remoto|fully\s+remote)/i;
+    const hybridRegex = /(híbrido|hibrido|hybrid|semipresencial)/i;
+
+    if (remoteRegex.test(combinedText)) {
+      return 'remote';
+    }
+    if (hybridRegex.test(combinedText)) {
+      return 'hybrid';
+    }
+    return 'on-site';
   }
 
   hide(): void {
@@ -79,21 +104,34 @@ export class Job {
     }
   }
 
-  shouldHide({ keywords, companies, whitelist, hiddenJobs }: Config): boolean {
+  shouldHide({ keywords, companies, whitelist, locations, workplaceTypes, hiddenJobs }: Config): boolean {
     if (this.isApplied()) {
       return true;
     }
 
-    const wasHiddenBefore = hiddenJobs.data.findIndex(id => id === this.id) > -1;
+    const wasHiddenBefore = hiddenJobs?.data?.findIndex(id => id === this.id) > -1;
     if (wasHiddenBefore) {
       return true;
     }
 
-    if (!keywords.enabled && !companies.enabled) {
-      return false;
+    if (workplaceTypes?.enabled && workplaceTypes.types && workplaceTypes.types.length > 0) {
+      const currentType = this.getWorkplaceType();
+      if (!workplaceTypes.types.includes(currentType)) {
+        return true;
+      }
     }
 
-    if (companies.enabled) {
+    if (locations?.enabled && locations.data && locations.data.length > 0) {
+      const isMatched = this.matchesLocation(locations.data);
+      if (locations.mode === 'blacklist' && isMatched) {
+        return true;
+      }
+      if (locations.mode === 'whitelist' && !isMatched) {
+        return true;
+      }
+    }
+
+    if (companies?.enabled) {
       const cleanJobCompany = this.company.trim().toLowerCase();
       const companyMatch = companies.data.some((company) => {
         const cleanConfigCompany = company.trim().toLowerCase();
@@ -109,14 +147,25 @@ export class Job {
       }
     }
 
-    const keywordMatch = (keyword: string): boolean => {
-      const regex = this.createKeywordRegex(keyword);
-      return regex.test(this.title) || regex.test(this.description ?? '');
-    };
+    if (whitelist?.enabled && this.matchesWhitelist(whitelist.data)) return false;
 
-    if (whitelist.enabled && this.matchesWhitelist(whitelist.data)) return false;
+    return keywords?.enabled && this.matchesKeywords(keywords);
+  }
 
-    return keywords.enabled && this.matchesKeywords(keywords);
+  private matchesLocation(locations: string[]): boolean {
+    const targetText = [
+      this.location ?? '',
+      this.title,
+      this.post.textContent ?? '',
+      this.description ?? ''
+    ].join(' ');
+
+    return locations.some((locKeyword) => {
+      const cleanLoc = locKeyword.trim();
+      if (cleanLoc.length === 0) return false;
+      const regex = this.createKeywordRegex(cleanLoc);
+      return regex.test(targetText);
+    });
   }
 
   private matchesWhitelist(whitelist: string[]): boolean {
@@ -162,3 +211,4 @@ export class Job {
     return new RegExp(`(?<![a-zA-Z0-9])${escapedKeyword}(?![a-zA-Z0-9+#.])`, 'i');
   }
 }
+

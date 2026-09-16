@@ -1,9 +1,11 @@
-import type { KeywordConfig } from "./Config";
+import type { KeywordConfig, LocationConfig, WorkplaceTypeConfig } from "./Config";
 import { CONFIG_UPDATED } from "./events";
 
 document.addEventListener('DOMContentLoaded', () => {
   setupVersion();
   setupKeywords();
+  setupLocations();
+  setupWorkplaceTypes();
   setupAutoAdvance();
   setupOtherCards(['companies', 'whitelist']);
 });
@@ -245,7 +247,10 @@ function renderChip(
     } else if (options?.dataKey) {
       const values = await getValueFromStorage(options.dataKey);
 
-      values.data.splice(values.data.findIndex(item => item === keyword), 1);
+      const index = values.data.findIndex((item: string) => item === keyword);
+      if (index !== -1) {
+        values.data.splice(index, 1);
+      }
 
       await chrome.storage.sync.set({ [options.dataKey]: values });
 
@@ -284,6 +289,172 @@ async function getKeywordsFromStorage(): Promise<KeywordConfig> {
     anywhere: [],
     title: [],
     description: [],
+  };
+}
+
+async function setupLocations() {
+  const card = document.querySelector<HTMLElement>('.feature-card[data-name="locations"]');
+  if (!card) return;
+
+  const dataKey = 'locations';
+  const toggle = card.querySelector<HTMLInputElement>('.toggle-trigger');
+  const content = card.querySelector<HTMLElement>('.card-content');
+  const input = card.querySelector<HTMLInputElement>('.chip-input');
+  const chipsBox = card.querySelector<HTMLElement>('.chips-box');
+  const emptyMessage = card.querySelector<HTMLElement>('.empty-message');
+  const modeBtns = card.querySelectorAll<HTMLButtonElement>('.mode-btn');
+
+  if (!toggle || !content || !input || !chipsBox || !emptyMessage) return;
+
+  const config = await getLocationsFromStorage();
+
+  if (config.enabled) {
+    content.classList.remove('hidden');
+    toggle.checked = true;
+  }
+
+  modeBtns.forEach((btn) => {
+    const mode = btn.dataset.mode;
+    if (mode === config.mode) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+
+    btn.addEventListener('click', async () => {
+      modeBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const currentConfig = await getLocationsFromStorage();
+      currentConfig.mode = (btn.dataset.mode as 'whitelist' | 'blacklist') || 'blacklist';
+      await chrome.storage.sync.set({ [dataKey]: currentConfig });
+      configChanged();
+    });
+  });
+
+  if (config.data.length > 0) {
+    emptyMessage.classList.add('hidden');
+  }
+
+  config.data.forEach((keyword: string) => renderChip(keyword, chipsBox, { dataKey, emptyMessage }));
+
+  toggle.addEventListener('change', async () => {
+    const currentConfig = await getLocationsFromStorage();
+    currentConfig.enabled = toggle.checked;
+
+    await chrome.storage.sync.set({ [dataKey]: currentConfig });
+
+    if (currentConfig.enabled) {
+      content.classList.remove('hidden');
+    } else {
+      content.classList.add('hidden');
+    }
+
+    configChanged();
+  });
+
+  input.addEventListener('keydown', async (e: KeyboardEvent) => {
+    if (e.key !== 'Enter') return;
+
+    const introducedKeywords = input.value.trim().split(',').map(key => key.trim());
+    if (introducedKeywords.length === 0) return;
+
+    const currentConfig = await getLocationsFromStorage();
+
+    introducedKeywords.forEach((introducedKeyword) => {
+      if (currentConfig.data.includes(introducedKeyword)) return;
+      currentConfig.data.push(introducedKeyword);
+      renderChip(introducedKeyword, chipsBox, { dataKey, emptyMessage });
+    });
+
+    emptyMessage.classList.add('hidden');
+    input.value = '';
+
+    await chrome.storage.sync.set({ [dataKey]: currentConfig });
+    configChanged();
+  });
+}
+
+async function getLocationsFromStorage(): Promise<LocationConfig> {
+  const values = await chrome.storage.sync.get(['locations']) as { locations?: any };
+  if (values.locations) {
+    return {
+      enabled: values.locations.enabled ?? false,
+      mode: values.locations.mode ?? 'blacklist',
+      data: Array.isArray(values.locations.data) ? values.locations.data : [],
+    };
+  }
+  return {
+    enabled: false,
+    mode: 'blacklist',
+    data: [],
+  };
+}
+
+async function setupWorkplaceTypes() {
+  const card = document.querySelector<HTMLElement>('.feature-card[data-name="workplaceTypes"]');
+  if (!card) return;
+
+  const dataKey = 'workplaceTypes';
+  const toggle = card.querySelector<HTMLInputElement>('.toggle-trigger');
+  const content = card.querySelector<HTMLElement>('.card-content');
+  const checkboxes = card.querySelectorAll<HTMLInputElement>('.workplace-type-checkbox');
+
+  if (!toggle || !content) return;
+
+  const config = await getWorkplaceTypesFromStorage();
+
+  if (config.enabled) {
+    content.classList.remove('hidden');
+    toggle.checked = true;
+  }
+
+  checkboxes.forEach((cb) => {
+    cb.checked = config.types.includes(cb.value as any);
+
+    cb.addEventListener('change', async () => {
+      const selectedTypes: ('remote' | 'hybrid' | 'on-site')[] = [];
+      checkboxes.forEach((c) => {
+        if (c.checked) {
+          selectedTypes.push(c.value as any);
+        }
+      });
+
+      const currentConfig = await getWorkplaceTypesFromStorage();
+      currentConfig.types = selectedTypes;
+
+      await chrome.storage.sync.set({ [dataKey]: currentConfig });
+      configChanged();
+    });
+  });
+
+  toggle.addEventListener('change', async () => {
+    const currentConfig = await getWorkplaceTypesFromStorage();
+    currentConfig.enabled = toggle.checked;
+
+    await chrome.storage.sync.set({ [dataKey]: currentConfig });
+
+    if (currentConfig.enabled) {
+      content.classList.remove('hidden');
+    } else {
+      content.classList.add('hidden');
+    }
+
+    configChanged();
+  });
+}
+
+async function getWorkplaceTypesFromStorage(): Promise<WorkplaceTypeConfig> {
+  const values = await chrome.storage.sync.get(['workplaceTypes']) as { workplaceTypes?: any };
+  if (values.workplaceTypes) {
+    return {
+      enabled: values.workplaceTypes.enabled ?? false,
+      types: Array.isArray(values.workplaceTypes.types) ? values.workplaceTypes.types : ['remote', 'hybrid', 'on-site'],
+    };
+  }
+  return {
+    enabled: false,
+    types: ['remote', 'hybrid', 'on-site'],
   };
 }
 
@@ -395,7 +566,7 @@ async function toggleField(dataKey: string, content: HTMLElement) {
   if (values.enabled) {
     content.classList.remove('hidden');
   } else {
-    content.classList.add('hidden');
+      content.classList.add('hidden');
   }
 
   configChanged();
@@ -412,7 +583,7 @@ async function inputChange(dataKey: string, chipsBox: HTMLElement, emptyMessage:
   const values = await getValueFromStorage(dataKey);
 
   introducedKeywords.forEach((introducedKeyword) => {
-    if (values.data.findIndex(keyword => keyword === introducedKeyword) >= 0) {
+    if (values.data.findIndex((keyword: string) => keyword === introducedKeyword) >= 0) {
       return;
     }
 
@@ -433,3 +604,4 @@ async function configChanged(): Promise<void> {
     chrome.tabs.sendMessage(tab.id, { type: CONFIG_UPDATED });
   }
 };
+
