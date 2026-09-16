@@ -32,11 +32,22 @@ async function handleJobFilter() {
   const currentJobId = new URLSearchParams(window.location.search).get('currentJobId');
 
   jobs.forEach((job: Job, index: number) => {
-    if (job.shouldHide(config)) {
+    job.onDismiss(() => {
+      hideJob.execute(job);
+    });
+
+    if (job.isApplied()) {
+      hideJob.execute(job);
+
+      if (job.id === currentJobId) {
+        const nextVisibleJob = jobs.slice(index + 1).find(j => !j.isHidden());
+        autoAdvancer.advance(nextVisibleJob, AdvanceEvent.FILTER_HIDDEN);
+      }
+    } else if (job.shouldHide(config)) {
       job.hide();
 
       if (job.id === currentJobId) {
-        const nextVisibleJob = jobs.slice(index + 1).find(job => !job.isHidden());
+        const nextVisibleJob = jobs.slice(index + 1).find(j => !j.isHidden());
         autoAdvancer.advance(nextVisibleJob, AdvanceEvent.FILTER_HIDDEN);
       }
     } else {

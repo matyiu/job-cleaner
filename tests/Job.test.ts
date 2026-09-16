@@ -177,4 +177,47 @@ describe('Job', () => {
       expect(job.isHidden()).toBe(false);
     });
   });
+
+  describe('isApplied', () => {
+    it('should return true when job post contains "Solicitados" or "Solicitado" or "Applied"', () => {
+      const post = document.createElement('div');
+      post.innerHTML = '<p>Solicitados</p>';
+
+      const job = JobMother.create().build();
+      job['post'] = post;
+
+      expect(job.isApplied()).toBe(true);
+      expect(job.shouldHide(ConfigMother.create().build())).toBe(true);
+    });
+
+    it('should return false when job post does not contain applied text', () => {
+      const post = document.createElement('div');
+      post.innerHTML = '<p>Visto</p>';
+
+      const job = JobMother.create().build();
+      job['post'] = post;
+
+      expect(job.isApplied()).toBe(false);
+    });
+  });
+
+  describe('onDismiss', () => {
+    it('should attach click listener to dismiss button and invoke callback', () => {
+      const post = document.createElement('div');
+      post.innerHTML = '<button type="button" aria-label="Descartar empleo «Full Stack Developer»"></button>';
+
+      const job = JobMother.create().build();
+      job['post'] = post;
+
+      let dismissed = false;
+      job.onDismiss(() => {
+        dismissed = true;
+      });
+
+      const button = post.querySelector('button') as HTMLButtonElement;
+      button.click();
+
+      expect(dismissed).toBe(true);
+    });
+  });
 });

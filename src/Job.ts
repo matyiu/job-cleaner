@@ -19,10 +19,18 @@ export class Job {
 
   hide(): void {
     this.post.style.display = 'none';
+    const topWrapper = this.post.closest('.ec39a3eb, li') as HTMLElement;
+    if (topWrapper && topWrapper !== this.post && topWrapper.parentElement !== document.body) {
+      topWrapper.style.display = 'none';
+    }
   }
 
   show(): void {
     this.post.style.display = '';
+    const topWrapper = this.post.closest('.ec39a3eb, li') as HTMLElement;
+    if (topWrapper) {
+      topWrapper.style.display = '';
+    }
   }
 
   select(): void {
@@ -40,7 +48,42 @@ export class Job {
     return this.post.style.display === 'none';
   }
 
+  isApplied(): boolean {
+    const elements = Array.from(this.post.querySelectorAll('p, span, div, li, a'));
+    return elements.some((el) => {
+      const text = el.textContent?.trim().toLowerCase();
+      if (!text) return false;
+      return (
+        text === 'solicitado' ||
+        text === 'solicitados' ||
+        text === 'solicitada' ||
+        text === 'solicitadas' ||
+        text === 'applied' ||
+        text.startsWith('solicitad') ||
+        text.startsWith('applied')
+      );
+    });
+  }
+
+  onDismiss(callback: () => void): void {
+    const dismissBtn = (
+      this.post.querySelector('button[aria-label*="Descartar"], button[aria-label*="Dismiss"], button.job-card-home__dismiss-btn') ||
+      this.post.querySelector('svg#close-small')?.closest('button')
+    ) as HTMLElement;
+
+    if (dismissBtn && !dismissBtn.dataset.jobFilterDismissBound) {
+      dismissBtn.dataset.jobFilterDismissBound = 'true';
+      dismissBtn.addEventListener('click', () => {
+        callback();
+      });
+    }
+  }
+
   shouldHide({ keywords, companies, whitelist, hiddenJobs }: Config): boolean {
+    if (this.isApplied()) {
+      return true;
+    }
+
     const wasHiddenBefore = hiddenJobs.data.findIndex(id => id === this.id) > -1;
     if (wasHiddenBefore) {
       return true;
@@ -50,17 +93,26 @@ export class Job {
       return false;
     }
 
-    if (companies.enabled && companies.data.findIndex(company => company.toLowerCase() === this.company.toLowerCase()) > -1) {
-      return true;
+    if (companies.enabled) {
+      const cleanJobCompany = this.company.trim().toLowerCase();
+      const companyMatch = companies.data.some((company) => {
+        const cleanConfigCompany = company.trim().toLowerCase();
+        return (
+          cleanConfigCompany.length > 0 &&
+          (cleanJobCompany === cleanConfigCompany ||
+            cleanJobCompany.includes(cleanConfigCompany) ||
+            cleanConfigCompany.includes(cleanJobCompany))
+        );
+      });
+      if (companyMatch) {
+        return true;
+      }
     }
 
     const keywordMatch = (keyword: string): boolean => {
-      const escapedKeyword = keyword.replaceAll(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-      const regex = this.createKeywordRegex(escapedKeyword);
-
+      const regex = this.createKeywordRegex(keyword);
       return regex.test(this.title) || regex.test(this.description ?? '');
-    }
+    };
 
     if (whitelist.enabled && this.matchesWhitelist(whitelist.data)) return false;
 
@@ -104,7 +156,8 @@ export class Job {
   }
 
   private createKeywordRegex(keyword: string): RegExp {
-    const escapedKeyword = keyword.replaceAll(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const trimmed = keyword.trim();
+    const escapedKeyword = trimmed.replaceAll(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
     return new RegExp(`(?<![a-zA-Z0-9])${escapedKeyword}(?![a-zA-Z0-9+#.])`, 'i');
   }

@@ -20,6 +20,11 @@ function debounce(fn: Procedure, delayInMs: number) {
 }
 
 export class DOMObserver {
+  private currentJobListContainer: HTMLElement | null = null;
+  private jobListObserver: MutationObserver | null = null;
+  private currentDescContainer: HTMLElement | null = null;
+  private descObserver: MutationObserver | null = null;
+
   constructor(
     private readonly jobParser: JobParser,
     private readonly jobState: JobState,
@@ -27,57 +32,106 @@ export class DOMObserver {
   ) { }
 
   public async init(handler: Procedure): Promise<void> {
-    const jobListContainer = document.querySelector(JOB_SEARCH_LIST_DOM_SELECTOR) as HTMLElement;
-    if (!jobListContainer) {
+    const runFilter = () => {
+      const container = document.querySelector(JOB_SEARCH_LIST_DOM_SELECTOR) as HTMLElement;
+      if (container) {
+        this.observeJobList(container, handler);
+      }
+
+      const descContainer = document.querySelector(JOB_DESCRIPTION_SELECTOR) as HTMLElement;
+      if (descContainer) {
+        this.observeJobDescription(descContainer, handler);
+      }
+    };
+
+    runFilter();
+
+    const bodyObserver = new MutationObserver(() => {
+      runFilter();
+    });
+
+    if (document.body) {
+      bodyObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+    } else {
+      document.addEventListener('DOMContentLoaded', () => {
+        runFilter();
+        if (document.body) {
+          bodyObserver.observe(document.body, { childList: true, subtree: true });
+        }
+      });
+    }
+  }
+
+  private observeJobList(jobListContainer: HTMLElement, handler: Procedure): void {
+    if (this.currentJobListContainer === jobListContainer) {
       return;
     }
+
+    if (this.jobListObserver) {
+      this.jobListObserver.disconnect();
+    }
+
+    this.currentJobListContainer = jobListContainer;
 
     const handleJobListChanged = debounce(() => {
       this.jobState.update(
         this.jobParser.parseList(jobListContainer)
       );
-
       handler();
-    }, 1000);
+    }, 300);
 
-    const jobListObserver = new MutationObserver((mutations) => {
+    handleJobListChanged();
+
+    this.jobListObserver = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
         if (mutation.type === 'childList') {
           handleJobListChanged();
+          break;
         }
       }
     });
 
-    jobListObserver.observe(jobListContainer, {
+    this.jobListObserver.observe(jobListContainer, {
       childList: true,
       subtree: true,
     });
+  }
 
-    const jobDescriptionContainer = document.querySelector(JOB_DESCRIPTION_SELECTOR) as HTMLElement;
-    if (!jobDescriptionContainer) {
+  private observeJobDescription(jobDescriptionContainer: HTMLElement, handler: Procedure): void {
+    if (this.currentDescContainer === jobDescriptionContainer) {
       return;
     }
+
+    if (this.descObserver) {
+      this.descObserver.disconnect();
+    }
+
+    this.currentDescContainer = jobDescriptionContainer;
 
     const handleJobDescriptionChanged = debounce(async () => {
       this.jobParser.parseDescription(
         this.jobState.get(),
         jobDescriptionContainer
       );
-
       handler();
-
       this.onAppliedJob?.handle();
-    }, 1000);
+    }, 300);
 
-    const jobDescriptionObserver = new MutationObserver((mutations) => {
+    handleJobDescriptionChanged();
+
+    this.descObserver = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
         if (mutation.type === 'childList') {
           handleJobDescriptionChanged();
+          break;
         }
       }
     });
 
-    jobDescriptionObserver.observe(jobDescriptionContainer, {
+    this.descObserver.observe(jobDescriptionContainer, {
       subtree: true,
       childList: true,
     });

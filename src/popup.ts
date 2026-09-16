@@ -2,10 +2,21 @@ import type { KeywordConfig } from "./Config";
 import { CONFIG_UPDATED } from "./events";
 
 document.addEventListener('DOMContentLoaded', () => {
+  setupVersion();
   setupKeywords();
   setupAutoAdvance();
   setupOtherCards(['companies', 'whitelist']);
 });
+
+function setupVersion() {
+  const versionLabel = document.getElementById('version-label');
+  if (versionLabel && typeof chrome !== 'undefined' && chrome.runtime?.getManifest) {
+    const manifest = chrome.runtime.getManifest();
+    if (manifest?.version) {
+      versionLabel.textContent = `v${manifest.version}`;
+    }
+  }
+}
 
 async function setupKeywords() {
   const card = document.querySelector<HTMLElement>('.feature-card[data-name="keywords"]');
