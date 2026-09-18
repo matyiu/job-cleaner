@@ -1,1 +1,3 @@
 export const CONFIG_UPDATED = 'CONFIG_UPDATED';
+export const UPDATE_BADGE = 'UPDATE_BADGE';
+

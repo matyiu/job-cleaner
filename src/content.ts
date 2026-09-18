@@ -1,5 +1,5 @@
 import { DOMObserver } from "./DOMObserver";
-import { CONFIG_UPDATED } from "./events";
+import { CONFIG_UPDATED, UPDATE_BADGE } from "./events";
 import type { Job } from "./Job";
 import { JobParser } from "./JobParser";
 import { JobState } from "./JobState";
@@ -46,7 +46,18 @@ async function handleJobFilter() {
     }
   });
 
+  const hiddenJobs = jobs.filter(job => job.isHidden());
+  const uniqueHiddenJobIds = new Set(hiddenJobs.map(job => job.id || job));
+  const hiddenCount = uniqueHiddenJobIds.size;
+  chrome.runtime.sendMessage({
+    type: UPDATE_BADGE,
+    hiddenCount
+  }).catch(() => {
+    // Ignore error if background script is not ready
+  });
+
   const visibleJobs = jobs.filter(job => !job.isHidden());
+
 
   if (visibleJobs.length === 0) {
     autoAdvancer.advance(undefined, AdvanceEvent.FILTER_HIDDEN);
