@@ -10,6 +10,10 @@ export class Job {
     private readonly location?: string,
   ) { }
 
+  getCompany(): string {
+    return this.company;
+  }
+
   updateDescription(description: string): void {
     this.description = description;
   }

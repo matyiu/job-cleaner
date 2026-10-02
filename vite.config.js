@@ -9,6 +9,12 @@ export default defineConfig({
   ],
   build: {
     minify: process.env.NODE_ENV === "production",
+    rollupOptions: {
+      input: {
+        popup: resolve(__dirname, "popup.html"),
+        dashboard: resolve(__dirname, "dashboard.html"),
+      },
+    },
   },
   server: {
     cors: {

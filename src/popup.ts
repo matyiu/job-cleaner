@@ -1,14 +1,78 @@
 import type { KeywordConfig, LocationConfig, WorkplaceTypeConfig } from "./Config";
 import { CONFIG_UPDATED } from "./events";
+import { JobApplicationRepository } from "./JobApplicationRepository";
+import { ApplicationStats } from "./ApplicationStats";
 
 document.addEventListener('DOMContentLoaded', () => {
   setupVersion();
+  setupStats();
   setupKeywords();
   setupLocations();
   setupWorkplaceTypes();
   setupAutoAdvance();
   setupOtherCards(['companies', 'whitelist']);
 });
+
+async function setupStats() {
+  const repo = new JobApplicationRepository();
+  const records = await repo.getAll();
+  const stats = new ApplicationStats(records);
+
+  const totalEl = document.getElementById('stats-total-count');
+  const todayEl = document.getElementById('stats-today-count');
+
+  if (totalEl) totalEl.textContent = String(stats.getTotalCount());
+  if (todayEl) todayEl.textContent = String(stats.getTodayCount());
+
+  const breakdownListEl = document.getElementById('daily-breakdown-list');
+  const breakdownData = stats.getDailyBreakdown();
+
+  if (breakdownListEl) {
+    if (breakdownData.length > 0) {
+      breakdownListEl.innerHTML = '';
+      breakdownData.forEach(item => {
+        const itemEl = document.createElement('div');
+        itemEl.className = 'breakdown-item';
+
+        const dateSpan = document.createElement('span');
+        dateSpan.className = 'breakdown-date';
+        dateSpan.textContent = item.date;
+
+        const countSpan = document.createElement('span');
+        countSpan.className = 'breakdown-count';
+        countSpan.textContent = `${item.count} ${item.count === 1 ? 'empleo' : 'empleos'}`;
+
+        itemEl.appendChild(dateSpan);
+        itemEl.appendChild(countSpan);
+        breakdownListEl.appendChild(itemEl);
+      });
+    }
+  }
+
+  const toggleBtn = document.getElementById('toggle-breakdown-btn');
+  const breakdownContent = document.getElementById('daily-breakdown-content');
+  if (toggleBtn && breakdownContent) {
+    toggleBtn.addEventListener('click', () => {
+      const isHidden = breakdownContent.classList.contains('hidden');
+      if (isHidden) {
+        breakdownContent.classList.remove('hidden');
+        toggleBtn.textContent = 'Ocultar desglose ▲';
+      } else {
+        breakdownContent.classList.add('hidden');
+        toggleBtn.textContent = 'Ver desglose diario ▼';
+      }
+    });
+  }
+
+  const openDashboardBtn = document.getElementById('open-dashboard-btn');
+  if (openDashboardBtn) {
+    openDashboardBtn.addEventListener('click', () => {
+      if (typeof chrome !== 'undefined' && chrome.tabs?.create) {
+        chrome.tabs.create({ url: chrome.runtime.getURL('dashboard.html') });
+      }
+    });
+  }
+}
 
 function setupVersion() {
   const versionLabel = document.getElementById('version-label');

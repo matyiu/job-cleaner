@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Cleaner - Panel de Analíticas y Empleos</title>
+  <link rel="stylesheet" href="./src/dashboard.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="dashboard-container">
+    <header class="dashboard-header">
+      <div class="brand">
+        <div class="logo-badge">JC</div>
+        <div>
+          <h1>Job Cleaner Analytics</h1>
+          <p class="subtitle">Panel local de seguimiento de postulaciones y métricas</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <span id="version-label" class="version-chip">v1.0.7</span>
+        <button id="clear-stats-btn" class="btn btn-outline-danger">Limpiar registros</button>
+      </div>
+    </header>
+
+    <main class="dashboard-content">
+      <!-- Metrics Overview -->
+      <section class="metrics-grid">
+        <div class="metric-card glow-accent">
+          <div class="metric-icon">💼</div>
+          <div class="metric-info">
+            <span class="metric-value" id="total-applied-count">0</span>
+            <span class="metric-label">Total Postulaciones</span>
+          </div>
+        </div>
+        <div class="metric-card glow-primary">
+          <div class="metric-icon">⚡</div>
+          <div class="metric-info">
+            <span class="metric-value" id="today-applied-count">0</span>
+            <span class="metric-label">Postulaciones Hoy</span>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon">📅</div>
+          <div class="metric-info">
+            <span class="metric-value" id="active-days-count">0</span>
+            <span class="metric-label">Días Activos</span>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon">📊</div>
+          <div class="metric-info">
+            <span class="metric-value" id="avg-per-day-count">0</span>
+            <span class="metric-label">Promedio / Día Activo</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Daily Visual Breakdown Section -->
+      <section class="card breakdown-section">
+        <div class="card-header">
+          <h2>Desglose Diario y Tendencia</h2>
+          <span class="badge">Local Data</span>
+        </div>
+        <div class="chart-container" id="chart-bars-container">
+          <div class="empty-state" id="chart-empty-state">No hay actividades registradas aún.</div>
+        </div>
+      </section>
+
+      <!-- Recent Applications History Log -->
+      <section class="card history-section">
+        <div class="card-header">
+          <h2>Historial de Ofertas Aplicadas</h2>
+          <input type="text" id="history-search-input" placeholder="Buscar por título o empresa..." class="search-input">
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Puesto / Título</th>
+                <th>Empresa</th>
+                <th>Ubicación</th>
+                <th>Fecha de Postulación</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="applications-table-body">
+              <tr>
+                <td colspan="5" class="empty-table-cell">No se encontraron registros de postulaciones.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Future Roadmap & Modules -->
+      <section class="roadmap-grid">
+        <div class="card roadmap-card">
+          <div class="roadmap-icon">📌</div>
+          <h3>Tablero Kanban de Aplicaciones</h3>
+          <p>Próximamente: Gestiona tus postulaciones por etapas (Postulado, Entrevista, Prueba Técnica, Oferta, Rechazado).</p>
+          <span class="badge badge-subtle">Próxima versión</span>
+        </div>
+        <div class="card roadmap-card">
+          <div class="roadmap-icon">🤖</div>
+          <h3>Automatizaciones y Filtros Avanzados</h3>
+          <p>Próximamente: Configura reglas personalizadas, respuestas automáticas y seguimiento masivo.</p>
+          <span class="badge badge-subtle">Próxima versión</span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="./src/dashboard.ts" type="module"></script>
+</body>
+
+</html>

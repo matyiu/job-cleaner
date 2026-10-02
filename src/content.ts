@@ -7,13 +7,15 @@ import { Storage } from "./Storage";
 import { AdvanceEvent, AutoAdvancer } from "./AutoAdvancer";
 import { HideJob } from "./HideJob";
 import { OnAppliedJob } from "./OnAppliedJob";
+import { JobApplicationRepository } from "./JobApplicationRepository";
 
 const jobParser = new JobParser();
 const storage = new Storage();
 const jobState = new JobState();
 const hideJob = new HideJob(storage);
 const autoAdvancer = new AutoAdvancer(storage);
-const onAppliedJob = new OnAppliedJob(jobState, autoAdvancer, hideJob);
+const jobApplicationRepository = new JobApplicationRepository();
+const onAppliedJob = new OnAppliedJob(jobState, autoAdvancer, hideJob, jobApplicationRepository);
 const domObserver = new DOMObserver(jobParser, jobState, onAppliedJob);
 
 domObserver.init(handleJobFilter);
@@ -40,6 +42,9 @@ async function handleJobFilter() {
     });
 
     if (job.isApplied() || job.shouldHide(config)) {
+      if (job.isApplied()) {
+        onAppliedJob.recordAppliedJob(job);
+      }
       job.hide();
     } else {
       job.show();

@@ -13,6 +13,36 @@
     </header>
 
     <main>
+      <section class="feature-card stats-card" data-name="stats">
+        <div class="card-header">
+          <div class="title-with-icon">
+            <span class="label">Estadísticas</span>
+          </div>
+          <button id="open-dashboard-btn" type="button" class="btn-secondary" title="Abrir panel en pantalla completa">
+            Panel ↗
+          </button>
+        </div>
+        <div class="stats-overview">
+          <div class="stat-box">
+            <span class="stat-value" id="stats-total-count">0</span>
+            <span class="stat-label">Total Aplicados</span>
+          </div>
+          <div class="stat-box accent">
+            <span class="stat-value" id="stats-today-count">0</span>
+            <span class="stat-label">Aplicados Hoy</span>
+          </div>
+        </div>
+        <div class="card-content hidden" id="daily-breakdown-content">
+          <div class="breakdown-title">Desglose Diario</div>
+          <div id="daily-breakdown-list" class="breakdown-list">
+            <span class="empty-message">No hay registros aún...</span>
+          </div>
+        </div>
+        <button type="button" id="toggle-breakdown-btn" class="toggle-breakdown-btn">
+          Ver desglose diario ▼
+        </button>
+      </section>
+
       <section class="feature-card" data-name="keywords">
         <div class="card-header">
           <span class="label">Keywords</span>
@@ -155,7 +185,7 @@
       </section>
     </main>
     <footer class="popup-footer">
-      <span id="version-label">v1.0.5</span>
+      <span id="version-label">v1.0.8</span>
     </footer>
   </div>
   <script src="./src/popup.ts" type="module"></script>
