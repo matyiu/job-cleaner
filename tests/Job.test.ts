@@ -77,7 +77,7 @@ describe('Job', () => {
       expect(job.shouldHide(config)).toBe(true);
     });
 
-    it('when a company keyword is matched in the company', () => {
+    it('when a company keyword is matched strictly in the company', () => {
       const job = JobMother.create().withCompany('Google').build();
       const config = ConfigMother.create().withCompanies({
         enabled: true,
@@ -85,6 +85,16 @@ describe('Job', () => {
       }).build();
 
       expect(job.shouldHide(config)).toBe(true);
+    });
+
+    it('should not hide a job when company name contains a company keyword as substring (strict matching)', () => {
+      const job = JobMother.create().withCompany('Balance').build();
+      const config = ConfigMother.create().withCompanies({
+        enabled: true,
+        data: ['Alan'],
+      }).build();
+
+      expect(job.shouldHide(config)).toBe(false);
     });
 
     it('should not hide a job when no keywords and companies are matched', () => {

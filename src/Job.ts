@@ -141,9 +141,7 @@ export class Job {
         const cleanConfigCompany = company.trim().toLowerCase();
         return (
           cleanConfigCompany.length > 0 &&
-          (cleanJobCompany === cleanConfigCompany ||
-            cleanJobCompany.includes(cleanConfigCompany) ||
-            cleanConfigCompany.includes(cleanJobCompany))
+          cleanJobCompany === cleanConfigCompany
         );
       });
       if (companyMatch) {

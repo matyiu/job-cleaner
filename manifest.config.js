@@ -2,8 +2,8 @@ import { defineManifest } from '@crxjs/vite-plugin'
 
 export default defineManifest({
   "name": "Job Cleaner",
-  "description": "Job Cleaner v1.0.8",
-  "version": "1.0.8",
+  "description": "Job Cleaner v1.0.9",
+  "version": "1.0.9",
 
   "manifest_version": 3,
   "options_page": "dashboard.html",
