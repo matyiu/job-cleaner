@@ -124,6 +124,9 @@ describe('AutoAdvancer', () => {
   describe('advance', () => {
     it('should select nextJob if provided', async () => {
       vi.useFakeTimers();
+      vi.mocked(chrome.storage.sync.get).mockResolvedValueOnce({
+        autoAdvance: { enabled: true, delay: 500 }
+      });
       const job = JobMother.create().build();
       const selectSpy = vi.spyOn(job, 'select');
 
@@ -136,6 +139,9 @@ describe('AutoAdvancer', () => {
 
     it('should click next button if nextJob is undefined', async () => {
       vi.useFakeTimers();
+      vi.mocked(chrome.storage.sync.get).mockResolvedValueOnce({
+        autoAdvance: { enabled: true, delay: 500 }
+      });
       document.body.innerHTML = `
         <button type="button" data-testid="pagination-controls-next-button-visible">Siguiente</button>
       `;
@@ -166,6 +172,27 @@ describe('AutoAdvancer', () => {
       button.addEventListener('click', () => { clicked = true; });
 
       await autoAdvancer.advance(undefined, AdvanceEvent.APPLIED);
+      vi.runAllTimers();
+
+      expect(clicked).toBe(false);
+      vi.useRealTimers();
+    });
+
+    it('should not advance on FILTER_HIDDEN event if autoAdvance is disabled in storage', async () => {
+      vi.useFakeTimers();
+      document.body.innerHTML = `
+        <button type="button" data-testid="pagination-controls-next-button-visible">Siguiente</button>
+      `;
+
+      vi.mocked(chrome.storage.sync.get).mockResolvedValueOnce({
+        autoAdvance: { enabled: false, delay: 500 }
+      });
+
+      const button = document.querySelector('button') as HTMLButtonElement;
+      let clicked = false;
+      button.addEventListener('click', () => { clicked = true; });
+
+      await autoAdvancer.advance(undefined, AdvanceEvent.FILTER_HIDDEN);
       vi.runAllTimers();
 
       expect(clicked).toBe(false);

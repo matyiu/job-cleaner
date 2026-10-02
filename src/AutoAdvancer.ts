@@ -95,8 +95,8 @@ export class AutoAdvancer {
   public async advance(nextJob: Job | undefined, event: AdvanceEvent = AdvanceEvent.FILTER_HIDDEN): Promise<void> {
     const config = await this.storage.get();
 
-    if (event === AdvanceEvent.APPLIED) {
-      if (!config.autoAdvance.enabled) return;
+    if (!config.autoAdvance?.enabled) {
+      return;
     }
 
     const delay = event === AdvanceEvent.FILTER_HIDDEN ? 0 : config.autoAdvance.delay;

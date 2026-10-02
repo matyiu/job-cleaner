@@ -1,8 +1,8 @@
 import { Job } from "./Job";
 
-const JOB_POST_SELECTOR = 'li[data-occludable-job-id], [componentkey^="job-card-component-ref-"][role="button"], [componentkey^="job-card-component-ref-"]';
-const JOB_POST_TITLE_SELECTOR = ".job-card-list__title--link strong, .job-card-list__title--link";
-const JOB_POST_COMPANY_SELECTOR = ".artdeco-entity-lockup__subtitle, .job-card-container__company-name";
+const JOB_POST_SELECTOR = 'li[data-occludable-job-id], [data-job-id], [componentkey^="job-card-component-ref-"][role="button"], [componentkey^="job-card-component-ref-"]';
+const JOB_POST_TITLE_SELECTOR = ".job-card-list__title--link strong, .job-card-list__title--link, .job-card-container__link";
+const JOB_POST_COMPANY_SELECTOR = ".job-card-container__primary-description, .artdeco-entity-lockup__subtitle, .job-card-container__company-name";
 const JOB_POST_LOCATION_SELECTOR = ".job-card-container__metadata-item, .job-card-location, .artdeco-entity-lockup__caption, .job-card-container__metadata-wrapper";
 const JOB_DESCRIPTION_SELECTOR = "#job-details, .jobs-search__job-details";
 const JOB_DESCRIPTION_CONTAINER_SELECTOR = '.jobs-search__job-details--container';
@@ -21,10 +21,10 @@ export class JobParser {
     jobPosts.forEach((jobPost) => {
       const id = this.extractJobId(jobPost);
       const title = this.extractTitle(jobPost);
-      const company = this.extractCompany(jobPost);
+      const company = this.extractCompany(jobPost) || 'Empresa N/A';
       const location = this.extractLocation(jobPost);
 
-      if (id && title && company) {
+      if (id && title) {
         jobs.push(
           new Job(id.trim(), title.trim(), company.trim(), jobPost, undefined, location ? location.trim() : undefined)
         );
@@ -35,8 +35,15 @@ export class JobParser {
   }
 
   private extractJobId(jobPost: HTMLElement): string | null {
-    if (jobPost.dataset.occludableJobId) {
+    if (jobPost.dataset.occludableJobId?.trim()) {
       return jobPost.dataset.occludableJobId.trim();
+    }
+    if (jobPost.dataset.jobId?.trim()) {
+      return jobPost.dataset.jobId.trim();
+    }
+    const attrJobId = jobPost.getAttribute('data-job-id');
+    if (attrJobId?.trim()) {
+      return attrJobId.trim();
     }
 
     const componentKey = jobPost.getAttribute('componentkey') || jobPost.dataset.componentkey;
@@ -49,6 +56,12 @@ export class JobParser {
     if (nestedKey) {
       const match = nestedKey.match(/job-card-component-ref-(\d+)/);
       if (match) return match[1];
+    }
+
+    const jobLink = jobPost.querySelector('a[href*="/jobs/view/"], a[href*="currentJobId="]') as HTMLAnchorElement | null;
+    if (jobLink) {
+      const match = jobLink.href.match(/(?:\/jobs\/view\/|currentJobId=)(\d+)/);
+      if (match && match[1]) return match[1];
     }
 
     return null;
@@ -69,7 +82,7 @@ export class JobParser {
       return oldTitle.trim();
     }
 
-    const ariaHiddenSpan = jobPost.querySelector('p span[aria-hidden="true"]');
+    const ariaHiddenSpan = jobPost.querySelector('p span[aria-hidden="true"], strong');
     if (ariaHiddenSpan) {
       const titleText = ariaHiddenSpan.childNodes[0]?.textContent || ariaHiddenSpan.textContent;
       if (titleText?.trim()) {
@@ -102,7 +115,7 @@ export class JobParser {
       }
     }
 
-    return null;
+    return 'Empresa N/A';
   }
 
   private extractLocation(jobPost: HTMLElement): string | null {
@@ -124,13 +137,28 @@ export class JobParser {
 
   public parseDescription(jobs: Job[], wrapper: HTMLElement): void {
     const jobDescription = wrapper.querySelector(JOB_DESCRIPTION_SELECTOR) as HTMLElement;
-    const ariaLabel = wrapper.querySelector(JOB_DESCRIPTION_CONTAINER_SELECTOR)?.ariaLabel?.trim();
-
     if (!jobDescription || !jobDescription.textContent) return;
 
+    const descText = jobDescription.textContent.trim();
+    const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+    const urlMatch = currentUrl.match(/(?:\/jobs\/view\/|currentJobId=)(\d+)/);
+    const urlJobId = urlMatch ? urlMatch[1] : null;
+
+    const containerTitle = wrapper.querySelector('.job-details-jobs-unified-top-card__job-title, .jobs-unified-top-card__job-title, h1, h2')?.textContent?.trim() ||
+      wrapper.querySelector(JOB_DESCRIPTION_CONTAINER_SELECTOR)?.ariaLabel?.trim();
+
     jobs.forEach((job) => {
-      if (job.title === ariaLabel) {
-        job.updateDescription(jobDescription.textContent.trim());
+      if (urlJobId && job.id === urlJobId) {
+        job.updateDescription(descText);
+        return;
+      }
+
+      if (containerTitle) {
+        const cleanContainer = containerTitle.toLowerCase().replace(/\s+/g, ' ');
+        const cleanJobTitle = job.title.toLowerCase().replace(/\s+/g, ' ');
+        if (cleanContainer === cleanJobTitle || cleanContainer.includes(cleanJobTitle) || cleanJobTitle.includes(cleanContainer)) {
+          job.updateDescription(descText);
+        }
       }
     });
   }

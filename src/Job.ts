@@ -79,18 +79,11 @@ export class Job {
 
   isApplied(): boolean {
     const elements = Array.from(this.post.querySelectorAll('p, span, div, li, a'));
+    const appliedRegex = /\b(solicitado|solicitada|solicitados|solicitadas|solicitaste|applied)\b/i;
     return elements.some((el) => {
-      const text = el.textContent?.trim().toLowerCase();
+      const text = el.textContent?.trim();
       if (!text) return false;
-      return (
-        text === 'solicitado' ||
-        text === 'solicitados' ||
-        text === 'solicitada' ||
-        text === 'solicitadas' ||
-        text === 'applied' ||
-        text.startsWith('solicitad') ||
-        text.startsWith('applied')
-      );
+      return appliedRegex.test(text);
     });
   }
 

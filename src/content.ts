@@ -63,13 +63,14 @@ async function handleJobFilter() {
 
   const visibleJobs = jobs.filter(job => !job.isHidden());
 
-
   if (visibleJobs.length === 0) {
-    autoAdvancer.advance(undefined, AdvanceEvent.FILTER_HIDDEN);
+    if (config.autoAdvance?.enabled) {
+      autoAdvancer.advance(undefined, AdvanceEvent.FILTER_HIDDEN);
+    }
     return;
   }
 
-  if (currentJobId) {
+  if (currentJobId && config.autoAdvance?.enabled) {
     const currentJob = jobs.find(j => j.id === currentJobId);
     if (currentJob && currentJob.isHidden()) {
       const currentJobIndex = jobs.findIndex(j => j.id === currentJobId);
